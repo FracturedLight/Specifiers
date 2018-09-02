@@ -73,3 +73,5 @@ for(decltype(auto) str : strArr)
 {
 }
 ```
+
+Here ```decltype(auto) == std::string&```.
