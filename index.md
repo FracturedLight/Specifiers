@@ -1,37 +1,75 @@
-## Welcome to GitHub Pages
+## Specifiers:-
 
-You can use the [editor on GitHub](https://github.com/FracturedLight/Specifiers/edit/master/index.md) to maintain and preview the content for your website in Markdown files.
+### auto - Why we should we be using/care about auto?
+Attempting to use a typeless variable declared with auto will result in a compile error:
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+```
+std:vector<int> numbers;
 
-### Markdown
+// Compile Error
+auto x;
+numbers.push_back(x);
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
+// Undefined Beaviour
+int x;
+numbers.push_back(x);
 ```
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+auto is often used as a convience to avoid typing out the mother of all template type declarations:
 
-### Jekyll Themes
+```
+std::vector<std::pair<data, metaData>> dataList;
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/FracturedLight/Specifiers/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+typedef std::vector<std::pair<data, metaData>>::iterator dataListIt;
+dataListIt It = dataList.begin();
 
-### Support or Contact
+auto It = dataList.begin();
+```
 
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+Admittadley ```std::vector<std::pair<data, metaData>>``` is not a massively unwieldly type, but it does get worse, and ```auto``` to declare the iterator is still more convienent than writing the whole type out by hand. Another more subtle advantage of auto is that it prevents us from making silly mistakes like declaring an incorrect type, which the type we want converts to. Such as declaring an ```int``` and assigning it to the return value of a function that returns some convuloted alias of ```long```.
+
+## Trailing Return Type Syntax
+
+This syntax allows us to include function arguments when declaring the function return type (NOTE: ```auto``` does not actually deduce anything here, it's just to indicate the trailing return type syntax): 
+
+```
+template<typename Term1, typename Term2>
+auto Sum(const Term1& t1, const Term2& t2)
+  -> decltype(t1 + t2)
+{
+    return t1 + t2;
+}
+```
+
+## Type Deduction
+
+```auto``` uses the same type dedcution system as templates with one minor execption:
+
+```
+auto x = { 1, 2, 3 };
+```
+
+Here ```auto``` will actually deduce to ```std::initializer_list<int>``` with 3 elements. Unfortunately 
+
+```
+auto x = { 1 };
+```
+
+will also deduce to ```std::initializer_list<int>```, this has been changed to deduce to ```int``` as of C++17.
+
+Template type deduction doesn't take `const`ness or references into account which means here:
+
+```
+std::string strArr[10];
+for(auto str : strArr)
+{
+}
+```
+
+```auto``` deduces to ```std::string```, this is typically solved by explicitly marking ```auto``` as a reference. However the array may be some complex type that returns r-values that will bind to and dangle from either ```T&``` or ```auto&```. C++14 solves this by introducing the ```decltype(auto)``` idiom, essentially it allows you to use the ```auto``` speicifer with ```decltype``` type deduction rules:
+```
+std::string strArr[10];
+for(decltype(auto) str : strArr)
+{
+}
+```
