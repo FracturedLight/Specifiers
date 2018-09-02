@@ -1,7 +1,7 @@
 # Specifiers:-
 
 ## auto
-Attempting to use a typeless and unitilaised variable declared with auto will result in a compile error:
+Attempting to use a typeless and unitilaised variable declared with ```auto``` will result in a compile error:
 
 ```
 std:vector<int> numbers;
