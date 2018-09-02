@@ -1,6 +1,6 @@
-## Specifiers:-
+# Specifiers:-
 
-### auto
+## auto
 Attempting to use a typeless variable declared with auto will result in a compile error:
 
 ```
